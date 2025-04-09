@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Landmark di Indonesia</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!--Tambahkan Leaflet MiniMap -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.js"></script>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        header {
+            background-color: hsl(321, 89%, 42%);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            display: flex;
+            height: 90vh;
+        }
+        #sidebar {
+            width: 300px;
+            min-width: 200px;
+            max-width: 500px;
+            background: #f8f9fa;
+            padding: 15px;
+            overflow-y: auto;
+            border-right: 1px solid #ccc;
+            resize: horizontal;
+        }
+        #map {
+            flex: 1;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .search-container input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 5px;
+            width: 100%;
+        }
+
+        .search-container img {
+            width: 20px;
+            opacity: 0.7;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding: 8px;
+            cursor: pointer;
+            color: hwb(321 5% 64%);
+            border-bottom: 1px solid hsl(321, 100%, 50%);
+        }
+        li:hover {
+            background: hsl(321, 75%, 87%);
+        }
+    </style>
+</head>
+<body>
+
+    <header>PETA LANDMARK DI INDONESIA</header>
+
+    <div class="container">
+        <div id="sidebar">
+            <div class="search-container">
+                <input type="text" id="search" placeholder="Cari landmark atau provinsi..." onkeyup="filterLandmarks()">
+                <img src="https://cdn-icons-png.flaticon.com/512/482/482631.png" alt="🔍">
+            </div>
+            <div id="landmark-list"></div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <script>
+        var map = L.map('map').setView([-2.5489, 118.0149], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var landmarks = {
+            //Sumatera
+            "Aceh": { name: "Masjid Raya Baiturrahman", lat: 5.5536, lng: 95.3173, 
+                      desc: "Masjid bersejarah di Banda Aceh yang menjadi ikon budaya Islam di Indonesia.",
+                      loc: "Banda Aceh, Aceh",
+                      img: "https://wonderfulimage.s3-id-jkt-1.kilatstorage.id/1719210815-dji-0623-jpg-medium.jpg",
+                      link: "https://id.wikipedia.org/wiki/Masjid_Raya_Baiturrahman" },
+            "Sumatera Utara": { name: "Istana Maimun", lat: 3.575201, lng: 98.683883, 
+                      desc: "Istana Kesultanan Deli dengan arsitektur khas Melayu.",
+                      loc: "Medan, Sumatera Utara",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Istana_Maimoon.jpg/1920px-Istana_Maimoon.jpg",
+                      link: "https://id.wikipedia.org/wiki/Istana_Maimun" },
+            "Riau": { name: "Candi Muara Takus", lat: 0.3377217267643403, lng: 100.64327861796032, 
+                      desc: "Kompleks candi Buddha yang diperkirakan milik kerajaan Sriwijaya.",
+                      loc: "Kab. Kampar, Riau",
+                      img: "https://fahum.umsu.ac.id/info/wp-content/uploads/2024/03/Candi-Muara-Takus-Sejarah-Fungsi-Ada-apa-saja-di-Candi-Muara-Takus.jpg",
+                      link: "https://www.djkn.kemenkeu.go.id/artikel/baca/16109/Melestarikan-Cagar-Budaya-Candi-Muara-Takus-Guna-Menjaga-Ketahanan-Budaya-Bangsa.html" },
+            "Sumatera Barat": { name: "Jam Gadang Bukittinggi", lat: -0.30519036522601456, lng: 100.3695189265218, 
+                      desc: "Objek wisata populer di pusat kota dengan menara jam megah tahun 1926 di tengah taman yang menawan.",
+                      loc: "Bukittinggi, Sumatera Barat",
+                      img: "https://alvarotrans.com/images/news/alvaro-transport-jogja-23-tempat-wisata-paling-popular-di-padang-sumatra-barat-2.jpeg",
+                      link: "https://www.detik.com/sumut/wisata/d-7285988/sejarah-dan-fakta-jam-gadang-bukittinggi-landmark-di-sumatera-barat" },
+            "Jambi": { name: "Museum Menara Gentala Arasy", lat: -1.5850022769015188, lng: 103.61427557872236, 
+                      desc: "Museum yang menggambarkan perkembangan Islam di Provinsi Jambi.",
+                      loc: "Kota Jambi, Jambi",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Menara_Gentala_Arasy.jpg/1385px-Menara_Gentala_Arasy.jpg",
+                      link: "https://id.m.wikipedia.org/wiki/Museum_Menara_Gentala_Arasy" },
+            "Kepulauan Riau": { name: "Tugu Provinsi Kepri", lat: 0.8792962374369041, lng: 104.4571393613494, 
+                      desc: "Monumen berbentuk lambang Provinsi Kepulauan Riau.",
+                      loc: "Tanjung Pinang, Kepulauan Riau",
+                      img: "https://images.genpi.co/resize/1080x720-100/uploads/news/watermark/2019/03/23/d083063a8e55f60f05f8ff0b13658dd0.webp",
+                      link: "https://www.genpi.co/berita/8264/tugu-provinsi-kepri-ikon-baru-tanjungpinang?page=1" },
+            "Sumatera Selatan": { name: "Jembatan Ampera", lat: -2.9917257852846824, lng: 104.7635956163204, 
+                      desc: "Dibangun pada tahun 1965, jembatan yang membentang di atas Sungai Musi ini memiliki menara merah dan lampu hias di malam hari. ",
+                      loc: "Palembang, Sumatera Selatan",
+                      img: "https://s1-id.alongwalker.co/wp-content/uploads/2024/07/image-jembatan-ampera-menyaksikan-lebih-dekat-pesona-ikon-kota-palembang-8214fa4fb932e5f9060f9474a600307d.jpg",
+                      link: "https://www.detik.com/sumbagsel/wisata/d-6765118/jembatan-ampera-sejarah-makna-nama-dan-daya-tariknya" },
+            "Bangka Belitung": { name: "Jembatan Emas", lat: -2.08571178479857, lng: 106.15739270705825, 
+                      desc: "jembatan yang terletak di Kepulauan Bangka Belitung yang berfungsi dalam menghubungkan Pulau Bangka dan Kabupaten Bangka.",
+                      loc: "Kabupaten Bangka, Bangka Belitung",
+                      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQE2EaXwbMTkAd4tD_jhu7jd3auVaoOK3vuTY6s0_n8ppcOdy833F1rYOXAQ5kXKiD1Is&usqp=CAU",
+                      link: "https://www.detik.com/sumbagsel/wisata/d-6765118/jembatan-ampera-sejarah-makna-nama-dan-daya-tariknya" },
+            "Bengkulu": { name: "Benteng Marlborough", lat: -3.786991128551256, lng: 102.25170788194251, 
+                      desc: "Benteng peninggalan Inggris di Kota Bengkulu.",
+                      loc: "Kota Bengkulu, Bengkulu",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/5/59/Front_gate_of_Fort_Marlborough%2C_Bengkulu_2015-04-19_02.jpg",
+                      link: "https://id.wikipedia.org/wiki/Benteng_Marlborough" },
+            "Lampung": { name: "Menara Siger", lat: -5.865283635767045, lng: 105.74970693198702, 
+                      desc: "Sebuah menara yang menjadi titik nol di Sumatera bagian selatan.",
+                      loc: "Kabupaten Lampung Selatan, Lampung",
+                      img: "https://traverse.id/wp-content/uploads/2018/03/Menara-Siger-Ikon-Lampung-Sekaligus-Tempat-Wisata-Seni-dan-Budaya.jpg",
+                      link: "https://www.harianhaluan.com/news/109991496/mengenal-menara-siger-landmark-lampung-dengan-aristekturnya-yang-unik?page=1" },
+
+            //Jawa
+            "Banten": { name: "Masjid Agung Banten", lat: -6.036045922365275, lng: 106.15415615186818, 
+                      desc: "Masjid dengan menara yang dibangun pada abad ke-16 & sisa-sisa kota pelabuhan tua Banten.",
+                      loc: "Serang, Banten",
+                      img: "https://assets.pikiran-rakyat.com/crop/0x0:0x0/750x500/photo/2021/04/03/3576951048.jpg",
+                      link: "https://duniamasjid.islamic-center.or.id/71/masjid-agung-banten/" },
+            "DKI Jakarta": { name: "Monumen Nasional (Monas)", lat: -6.1754, lng: 106.8272, 
+                      desc: "Monumen peringatan perjuangan kemerdekaan Indonesia.",
+                      loc: "Jakarta Pusat, DKI Jakarta",
+                      img: "https://upload.wikimedia.org/wikipedia/id/b/b1/Merdeka_Square_Monas_02.jpg",
+                      link: "https://id.wikipedia.org/wiki/Monumen_Nasional" },
+            "Jawa Barat": { name: "Gedung Sate", lat: -6.902503446311071, lng: 107.61873398197892, 
+                      desc: "Bangunan administrasi kolonial Belanda yang megah yang dibangun pada tahun 1920-an, sekarang menjadi kantor pemerintahan Jawa Barat.",
+                      loc: "Bandung, Jawa Barat",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Gedung_Sate_Oktober_2024_-_Rahmatdenas.jpg/500px-Gedung_Sate_Oktober_2024_-_Rahmatdenas.jpg",
+                      link: "https://id.wikipedia.org/wiki/Gedung_Sate" },
+            "Jawa Tengah": { name: "Lawang Sewu", lat: -6.984036737543128, lng: 110.4108922594459, 
+                      desc: "Bekas kantor pusat Perusahaan Kereta Api Hindia Belanda era kolonial.",
+                      loc: "Semarang, Jawa Tengah",
+                      img: "https://assets.telkomsel.com/public/2025-02/wisata-lawang-sewu.png?VersionId=h5_Ks_gVfDr.wYynfQM0eJXQl8RCVZcF",
+                      link: "hhttps://id.wikipedia.org/wiki/Lawang_Sewu" },
+            "Daerah Istimewa Yogyakarta": { name: "Candi Prambanan", lat: -7.751988699896554, lng: 110.49129573410423, 
+                      desc: "Kompleks candi Hindu abad ke-9 yang luas, menampilkan bangunan dengan menara batu dan patung.",
+                      loc: "Kabupaten Sleman, Daerah Istimewa Yogyakarta",
+                      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQrvbNwxsD3ivZ4gSdnZWEM7gntlDmGlJUOA&s",
+                      link: "https://www.gramedia.com/literasi/sejarah-candi-prambanan/?srsltid=AfmBOoqkMrykqqociwczc564GrY4ZO2PmX0Dnx3Stzqf3ADKRc3DH3pW" },
+            "Jawa Timur": { name: "Monumen Tugu Pahlawan", lat: -7.245371208868004, lng: 112.7378556615246, 
+                      desc: "Sebuah monumen yang menjadi markah tanah Kota Surabaya.",
+                      loc: "Surabaya, Jawa Timur",
+                      img: "https://tiketwisata.surabaya.go.id/storage/tour/monumen-tugu-pahlawan_1680340884.jpeg",
+                      link: "https://id.wikipedia.org/wiki/Tugu_Pahlawan" },
+
+            //Kalimantan
+            "Kalimantan Barat": { name: "Tugu Khatulistiwa", lat: 0.0009755989797163738, lng: 109.32220593875252, 
+                      desc: "Sebuah bangunan yang berfungsi sebagai penanda area atau titik yang dilewati garis khatulistiwa.",
+                      loc: "Pontianak, Kalimantan Barat",
+                      img: "https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/146/2024/10/02/2-691428599.jpg",
+                      link: "https://id.wikipedia.org/wiki/Tugu_Khatulistiwa" },
+            "Kalimantan Tengah": { name: "Jembatan Kahayan", lat: -2.2022377814160587, lng: 113.92159361869753, 
+                      desc: "Jembatan yang membelah Sungai Kahayan di Kota Palangka Raya.",
+                      loc: "Palangka Raya, Kalimantan Tengah",
+                      img: "https://asset.kompas.com/crops/CfK5QNnTbl4lrQ6wXmk9VEYP7dI=/0x53:640x480/1200x800/data/photo/2023/12/11/6577333e71aaf.png",
+                      link: "https://id.wikipedia.org/wiki/Jembatan_Kahayan" },
+            "Kalimantan Selatan": { name: "Patung Bekantan", lat: -3.3217829680945448, lng: 114.5944696323539, 
+                      desc: "Bekantan merupakan hewan endemik Kalimantan, sekaligus maskot kebanggaan masyarakat Kalimantan Selatan.",
+                      loc: "Banjarmasin, Kalimantan Selatan",
+                      img: "https://upload.wikimedia.org/wikipedia/id/thumb/7/7e/Patung_Bekantan_Banjarmasin.JPG/1599px-Patung_Bekantan_Banjarmasin.JPG?20230510112547",
+                      link: "https://regional.kompas.com/read/2022/10/10/194136778/patung-bekantan-di-banjarmasin-daya-tarik-fungsi-dan-lokasi?page=all" },
+            "Kalimantan Timur": { name: "Jembatan Mahakam", lat: -0.5198012426767371, lng: 117.11946864144444, 
+                      desc: "Jembatan ikonik yang melintasi Sungai Mahakam, simbol kota Samarinda.",
+                      loc: "Samarinda, Kalimantan Timur",
+                      img: "https://nalarnews.id/wp-content/uploads/2025/02/Pengendara-bakal-menggunakan-Jembatan-Mahakam-IV-sebagai-akses-lalu-lintas-dengan-sistem-dua-arah-nalarnews.id_.jpg",
+                      link: "https://id.wikipedia.org/wiki/Jembatan_Mahkota_IV" },
+            "Kalimantan Utara": { name: "Tugu Cinta Damai", lat: 2.8560089261276813, lng: 117.36334547733716, 
+                      desc: "Monumen yang menjadi simbol perdamaian dan persatuan di Kalimantan Utara.",
+                      loc: "Tanjung Selor, Kalimantan Utara",
+                      img: "https://www.majalahlintas.com/storage/2024/09/KALTARA-11.jpg",
+                      link: "https://kaltara.tribunnews.com/2023/08/19/tugu-cinta-damai-dibangun-di-sekatak-berikut-penjelasan-bupati-bulungan-tentang-maknanya" },
+
+            //Nusa Tenggara dan Bali
+            "Bali": { name: "Pura Besakih", lat: -8.374004108998964, lng: 115.45255023635237, 
+                      desc: "Pura terbesar dan paling suci di Bali, terletak di lereng Gunung Agung.",
+                      loc: "Kabupaten Karangasem, Bali",
+                      img: "https://sewabusbali.com/wp-content/uploads/2019/09/besakih-temple.jpg",
+                      link: "https://id.wikipedia.org/wiki/Pura_Besakih" },
+            "Nusa Tenggara Barat": { name: "Islamic Centre NTB", lat: -8.58010251391027, lng: 116.10083986990573, 
+                      desc: "Bangunan Masjid Raya Hubbul Wathan Islamic Centre NTB seakan menyempurnakan sebutan kehormatan bagi Lombok sebagai “Island with a Thousand Mosque”.",
+                      loc: "Mataram, Nusa Tenggara Barat",
+                      img: "https://ntbprov.go.id/storage/b_program/o0B8ZOtzllojLI62tKLjy7aQjCN6rx6pEPShJDlY.jpeg",
+                      link: "https://www.kabarsore.com/2021/05/islamic-centre-ntb-kemegahan-icon-kota.html" },
+            "Nusa Tenggara Timur": { name: "Gong Perdamaian Kupang", lat: -10.158800544096769, lng: 123.61637473556941, 
+                      desc: "Dibuat untuk menggambarkan kerukunan dalam keberagaman di Kupang.",
+                      loc: "Kupang, Nusa Tenggara Timur",
+                      img: "https://indonesiakaya.com/wp-content/uploads/2020/10/Monumen_Gong_Perdamaian_Nusantara_yang_dibangun_ditengah-tengah_taman_menjadi_ciri_khas_taman_ini.jpg",
+                      link: "https://travel.kompas.com/read/2017/05/15/164834627/gong.perdamaian.dan.taman.nostalgia.kupang?page=all" },
+
+            //Sulawesi
+            "Sulawesi Utara": { name: "Jembatan Soekarno Hatta", lat: 1.4961285117835788, lng: 124.83959403965088, 
+                      desc: "sebuah jembatan kabel pancang di Kota Manado, Sulawesi Utara yang melintasi perairan Teluk Manado dan muara Sungai Tondano dan menghubungkan Pinaesaan, Wenang, Manado dengan Sindulang Satu, Tuminting, Manado.",
+                      loc: "Manado, Sulawesi Utara",
+                      img: "https://awsimages.detik.net.id/content/2015/08/20/1519/manadojembatan1fb.jpg",
+                      link: "https://id.wikipedia.org/wiki/Jembatan_Ir._Soekarno_(Manado)" },
+            "Gorontalo": { name: "Menara Limboto", lat: 0.6270326481861854, lng: 122.97984615287571, 
+                      desc: "Menara dengan ketinggian 65 yang meter yang menyerupai Menara Eiffel ini menjadi salah satu simbol kota Limboto dan menjadi salah satu tujuan wisata populer di Gorontalo.",
+                      loc: "Kabupaten Gorontalo, Gorontalo",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Menara_Keagungan.jpg/500px-Menara_Keagungan.jpg",
+                      link: "https://id.wikipedia.org/wiki/Menara_Keagungan" },
+            "Sulawesi Tengah": { name: "Jembatan Ponulele", lat: -0.8857131601589717, lng: 119.85921931788128, 
+                      desc: "Jembatan kuning ini merupakan jembatan lengkung pertama di Indonesia.",
+                      loc: "Palu, Sulawesi Tengah",
+                      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnVaa0cgAoyw7G9Pg-fb_gYAEEe9KkhwwPGg&s",
+                      link: "https://id.wikipedia.org/wiki/Jembatan_Palu_IV" },
+            "Sulawesi Barat": { name: "Anjoro Pitu", lat: -2.6951160028594314, lng: 118.90130499257295, 
+                      desc: "destinasi wisata yang menawarkan pemandangan spektakuler dan ikon kota yang memukau.",
+                      loc: "Kabupaten Mamuju, Sulawesi Barat",
+                      img: "https://cdn.rri.co.id/berita/Mamuju/o/1718019814400-zzzzzzzzzzzzAnjoro_Pitu2/69xis3aoxkuk4hp.jpeg",
+                      link: "https://rri.co.id/wisata/748804/anjoro-pitu-mamuju-landmark-ikonik-dengan-pemandangan-spektakuler" },
+            "Sulawesi Selatan": { name: "Tongkonan", lat: -2.996561240862446, lng: 119.91005944596151, 
+                      desc: "rumah adat khas Toraja di Sulawesi Selatan, yang berarti 'tempat duduk' dalam bahasa Toraja, dan berfungsi sebagai tempat berkumpul, bermusyawarah, dan membina kekerabatan keluarga.",
+                      loc: "Kabupaten Toraja Utara, Sulawesi Selatan",
+                      img: "https://www.ruparupa.com/blog/wp-content/uploads/2022/02/toraja-houses-1500.jpg",
+                      link: "https://www.gramedia.com/literasi/rumah-adat-tongkonan/?srsltid=AfmBOooAYKmtDe1WxnVR7a_trBUrIjCSQvuk54EYs3qRDkq0MqcV2SUH" },
+            "Sulawesi Tenggara": { name: "Tugu Religi Sultra", lat: -3.9757374195994553, lng: 122.51713966092176, 
+                      desc: "Dibangun untuk mempersiapkan Kota Kendari sebagai tuan rumah Musabaqah Tilawatil Quran Nasional XXI di tahun 2006, monumen ini menjadi salah satu ikon Kendari.",
+                      loc: "Kendari, Sulawesi Tenggara",
+                      img: "https://cdn.antaranews.com/cache/800x533/2020/09/13/Menara-MTQ-Square-Kendari-130920-Jjn-1.jpg",
+                      link: "https://id.wikipedia.org/wiki/Tugu_Religi_Sulawesi_Tenggara" },
+
+            //Maluku dan Papua
+            "Maluku Utara": { name: "Benteng Tolukko", lat: 0.8138119275185784, lng: 127.38820514882772, 
+                      desc: "Benteng peninggalan Portugis yang dibangun pada tahun 1522.",
+                      loc: "Ternate, Maluku Utara",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Fort_Tolukko_op_Ternate%2C_KITLV_178142.tiff/lossy-page1-500px-Fort_Tolukko_op_Ternate%2C_KITLV_178142.tiff.jpg",
+                      link: "https://id.wikipedia.org/wiki/Benteng_Tolukko" },
+            "Maluku": { name: "Benteng Belgica", lat: -4.526106505667453, lng: 129.89882721414435, 
+                      desc: "Sebuah benteng yang dibangun oleh bangsa Portugis pada abad 16 di Pulau Naira, Maluku.",
+                      loc: "Kabupaten Maluku Tengah, Maluku",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Fort_Belgica_01.JPG/550px-Fort_Belgica_01.JPG",
+                      link: "https://id.wikipedia.org/wiki/Benteng_Belgica" },
+            "Papua Barat": { name: "Taman Nasional Teluk Cenderawasih", lat: -2.548194345439449, lng: 134.47821089124153, 
+                      desc: "taman nasional perairan laut terluas di Indonesia, terdiri dari daratan dan pesisir pantai (0,9%), daratan pulau-pulau (3,8%), terumbu karang (5,5%), dan perairan lautan (89,8%).",
+                      loc: "Manokwari, Papua Barat",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Aku_dan_Alamku.jpg/500px-Aku_dan_Alamku.jpg",
+                      link: "https://id.wikipedia.org/wiki/Taman_Nasional_Teluk_Cenderawasih" },
+            "Papua": { name: "Danau Sentani", lat: -2.6089859735076724, lng: 140.5703736828493, 
+                      desc: "Danau Sentani berada di bawah lereng Pegunungan Cagar Alam Cyclops yang memiliki luas sekitar 245.000 hektar.",
+                      loc: "Kabupaten Jayapura, Papua",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Sentani_Lake.jpg/600px-Sentani_Lake.jpg",
+                      link: "https://id.wikipedia.org/wiki/Danau_Sentani" },
+            "Papua Selatan": { name: "Tugu Pepera", lat: -8.482928564693445,lng: 140.38889236970778, 
+                      desc: "Tugu Pepera dibangun untuk memperingati peristiwa bersejarah penentuan pendapat rakyat Papua atau Irian Barat menjadi bagian dari Indonesia.",
+                      loc: "Merauke, Papua Selatan",
+                      img: "https://portal.merauke.go.id/files/Tugu-Pepera.jpg",
+                      link: "https://www.goodnewsfromindonesia.id/2020/09/17/sejarah-hari-ini-17-september-1969-tugu-pepera-di-merauke-monumen-peringatan-irian-barat-menyatu-dengan-nkri" },
+            "Papua Tengah": { name: "Danau Paniai", lat: -3.904128625613158, lng: 136.31556308152545, 
+                      desc: "Danau Paniai yang kesohor memiliki panorama alam yang rancak, alami, dan terawat dengan baik.",
+                      loc: "Kabupaten Paniai, Papua Tengah",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Danau_Paniai._Danau_Paniai_adalah_danau_yang_berada_di_kabupaten_Paniai._Danau_ini_memiliki_banyak_keanekaragaman_hayati_yang_sangat_banyak._Salah_satu_spesies_endemiknya_adalah_udang_selingkuh.jpg/500px-thumbnail.jpg",
+                      link: "https://id.wikipedia.org/wiki/Danau_Paniai" },
+            "Papua Pegunungan": { name: "Puncak Trikora", lat: -4.253708589813811, lng: 138.66516164938784, 
+                      desc: "Puncak Trikora atau Ettiakup merupakan sebuah gunung yang terdapat di Papua Pegunungan, Indonesia.",
+                      loc: "Papua Pegunungan",
+                      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Puncak_Trikora_from_north._main_summit_%28center_left%29_and_west_ridge_by_Christian_Stangl_flickr.jpg/560px-Puncak_Trikora_from_north._main_summit_%28center_left%29_and_west_ridge_by_Christian_Stangl_flickr.jpg",
+                      link: "https://id.wikipedia.org/wiki/Puncak_Trikora" },
+            "Papua Barat Daya": { name: "Pagoda Sapta Ratna", lat: -0.8790397689919922, lng: 131.26885746587905, 
+                      desc: "Sebuah pagoda Tiongkok di Sorong , provinsi Papua Barat Daya, Indonesia .",
+                      loc: "Sorong, Papua Barat Daya",
+                      img: "https://cdn.visiteliti.com/article/2023-11/04/suT9nAQvk9xyQYbgXVis_1699071577.webp",
+                      link: "https://validnews.id/kultura/pagoda-sapta-ratna-indahnya-spot-wisata-religi-di-sorong" },
+        };
+
+        var markers = {};
+        //Tambahkan marker ke peta + Tooltip saat hover
+        for (let province in landmarks) {
+            let landmark = landmarks[province];
+
+            let customIcon = L.icon({
+                iconUrl: "https://cdn-icons-png.flaticon.com/512/2776/2776067.png",
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+
+            let marker = L.marker([landmark.lat, landmark.lng], { icon: customIcon })
+                .addTo(map)
+                .bindPopup(`
+                    <b>${landmark.name}</b><br>
+                    <img src="${landmark.img}" width="200"><br>
+                    <b>Lokasi:</b> ${landmark.loc}<br>
+                    <b>Deskripsi:</b> ${landmark.desc}<br>
+                    <a href="${landmark.link}" target="_blank">Baca selengkapnya</a>
+                `);
+
+            //Tooltip muncul saat hover
+            marker.on("mouseover", function (e) {
+                this.bindTooltip(landmark.name, { permanent: false, direction: "top" }).openTooltip();
+            });
+
+            //Tooltip menghilang saat kursor menjauh
+            marker.on("mouseout", function (e) {
+                this.closeTooltip();
+            });
+
+            markers[province] = marker;
+        }
+
+        let sidebarList = document.getElementById('landmark-list');
+        for (let province in landmarks) {
+            let landmark = landmarks[province];
+            let listItem = document.createElement('li');
+            listItem.innerHTML = `${province} - <b>${landmark.name}</b>`;
+            listItem.onclick = function() { goToLandmark(province); };
+            sidebarList.appendChild(listItem);
+        }
+
+        function filterLandmarks() {
+            let searchText = document.getElementById("search").value.toLowerCase();
+            document.querySelectorAll("#landmark-list li").forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(searchText) ? "" : "none";
+            });
+        }
+
+        function goToLandmark(province) {
+            if (markers[province]) {
+                map.setView(markers[province].getLatLng(), 10);
+                markers[province].openPopup();
+            }
+        }
+
+        //Inset Peta
+        var miniMapLayer = new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+        var miniMap = new L.Control.MiniMap(miniMapLayer, { toggleDisplay: true }).addTo(map);
+    </script>
+
+</body>
+</html>

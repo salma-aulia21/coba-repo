@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Web Map</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"></script>
+	
+	<!-- memanggil bootstrap -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+	<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+	
+	<script src="./bundle.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="./Leaflet.GraphicScale.min.css">
+	
+	<script src="./Leaflet.GraphicScale.min.js"></script>
+
+	
+	<style>
+	#map {
+		height: calc(100vh - 60px);
+	}
+	</style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="#">Navbar</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+     
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <button 
+	    class="btn btn-outline-success my-2 my-sm-0" 
+		onclick="cari()"
+		>
+		   Lokasi saya
+	  </button>
+    </form>
+  </div>
+</nav>
+	<!-- container peta -->
+	<div id="map"></div>
+	
+	<!-- script peta -->
+	<script src="./semarang.js"></script>
+    <script>
+	var map = L.map('map',{
+        center: [-6.988654, 110.422555],
+        zoom: 13
+        });
+		
+	var esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+	}).addTo(map);
+	
+	var carto = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+	subdomains: 'abcd',
+	maxZoom: 19
+	});
+	
+	
+	var banyumanik = L.marker([-7.065270306756934, 110.41951557247106]).bindPopup('Kecamatan Banyumanik'),
+		candisari    = L.marker([-7.01629073901802, 110.42750757644617]).bindPopup('Kecamatan Candisari'),
+		gajahmungkur    = L.marker([-7.01092925959053, 110.40496216090818]).bindPopup('Kecamatan Gajah Mungkur'),
+		gayamsari    = L.marker([-6.978081977622989, 110.44638036984817]).bindPopup('Kecamatan Gayamsari'),
+        genuk    = L.marker([-6.96519848114755, 110.47747604343182]).bindPopup('Kecamatan Genuk'),
+		gunungpati    = L.marker([-7.060511212702295, 110.37644633241747]).bindPopup('Kecamatan Gunung Pati'),
+		mijen    = L.marker([-7.066143744315323, 110.3175773128391]).bindPopup('Kecamatan Mijen'),
+        ngaliyan    = L.marker([-6.997853469384561, 110.3268207653151]).bindPopup('Kecamatan Ngaliyan'),
+		pedurungan    = L.marker([-7.000279653509848, 110.47310549290633]).bindPopup('Kecamatan Pedurungan'),
+		smgbarat    = L.marker([-6.984457527857489, 110.38391949664461]).bindPopup('Kecamatan Semarang Barat'),
+        smgselatan    = L.marker([-6.995471031427979, 110.42454601811637]).bindPopup('Kecamatan Semarang Selatan'),
+		smgtengah    = L.marker([-6.9807774353821905, 110.42159711512939]).bindPopup('Kecamatan Semarang Tengah'),
+		smgtimur    = L.marker([-6.974397059731866, 110.43721266295182]).bindPopup('Kecamatan Semarang Timur'),
+        smgutara    = L.marker([-6.963091337419406, 110.41306836676797]).bindPopup('Kecamatan Semarang Utara'),
+        tembalang    = L.marker([-7.046129974316293, 110.45923366790298]).bindPopup('Kecamatan Tembalang'),
+		tugu    = L.marker([-6.969553064126051, 110.32773388171226]).bindPopup('Kecamatan Tugu');
+	var semarang = L.layerGroup([banyumanik, candisari, gajahmungkur, gayamsari, genuk, gunungpati, mijen, ngaliyan, pedurungan, smgbarat, smgselatan, smgtengah, smgtimur,smgutara, tembalang, tugu]);
+	
+	
+	var baseMaps = {
+		"Citra Satelit": esri,
+		"Peta Carto": carto
+	};
+	
+	var overlayMaps = {
+		"Semarang": semarang
+	};
+	
+	L.control.layers(baseMaps, overlayMaps).addTo(map);
+	
+	
+	L.Control.geocoder().addTo(map);
+	
+	L.easyPrint({
+		title: 'My awesome print button',
+		position: 'topright',
+		sizeModes: ['A4Portrait', 'A4Landscape']
+	}).addTo(map);
+	
+	
+	var graphicScale = L.control.graphicScale({
+		fill: "fill",
+		doubleLine: "true",
+		showSubunits: "true"
+	}).addTo(map);
+	
+	
+	function cari(){
+		alert('tombol ditekan!');
+		map.locate({setView: true, maxZoom: 16});
+		
+		function onLocationFound(e) {
+			var radius = e.accuracy / 2;
+
+			L.marker(e.latlng).addTo(map)
+				.bindPopup("You are within " + radius + " meters from this point").openPopup();
+
+			L.circle(e.latlng, radius).addTo(map);
+		}
+
+		map.on('locationfound', onLocationFound);
+		
+	}
+	</script>
+	<script src="./semarang.js"></script>
+	<script>
+
+	L.geoJSON(srg,{
+		style: function(feature) {
+			switch (feature.properties.WADMKC) {
+				case 'Banyumanik': return {color: "#ff9900"};
+				case 'Candisari':   return {color: "red"};
+				case 'Gajah Mungkur':   return {color: "blue"};
+				case 'Gayamsari':   return {color: "white"};
+				case 'Genuk':   return {color: "magenta"};
+                case 'Gunung Pati': return {color: "yellow"};
+				case 'Mijen':   return {color: "pink"};
+				case 'Ngaliyan':   return {color: "purple"};
+				case 'Pedurungan':   return {color: "#0EF735"};
+				case 'Semarang Barat':   return {color: "#F7920E"};
+                case 'Semarang Tengah': return {color: "#0EC1F7"};
+				case 'Semarang Timur':   return {color: "#E4776F"};
+				case 'Semarang Utara':   return {color: "#A3A5D8"};
+				case 'Semarang Selatan':   return {color: "#1E0A6E"};
+				case 'Tembalang':   return {color: "#53AE89"};
+				case 'Tugu':   return {color: "#00958B"};
+			}
+		},
+		onEachFeature: function (feature, layer) {
+			layer.bindPopup(
+			'Kelurahan adalah ' + 
+			'<strong>' +
+			feature.properties.NAMOBJ +
+			'</strong>'
+			);
+		}
+	}).addTo(map);
+	
+	
+    </script>
+</body>
+</html>

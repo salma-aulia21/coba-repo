@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilangan Prima</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            display: inline-block;
+            width: 300px;
+        }
+
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Cari Bilangan Prima</h2>
+        <input type="number" id="angka" placeholder="Masukkan angka" min="1">
+        <button onclick="cariBilanganPrima()">Tampilkan</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function isPrima(n) {
+            if (n < 2) return false;
+            for (let i = 2; i <= Math.sqrt(n); i++) {
+                if (n % i === 0) return false;
+            }
+            return true;
+        }
+
+        function cariBilanganPrima() {
+            let angka = document.getElementById("angka").value;
+            let hasil = document.getElementById("result");
+
+            if (angka === "" || angka <= 0) {
+                hasil.innerHTML = "<p style='color:red;'>Masukkan angka yang valid!</p>";
+                return;
+            }
+
+            let primes = [];
+            for (let i = 1; i <= angka; i++) {
+                if (isPrima(i)) {
+                    primes.push(i);
+                }
+            }
+
+            hasil.innerHTML = `<strong>Bilangan prima sampai ${angka}:</strong> <br> ${primes.join(", ")}`;
+        }
+    </script>
+
+</body>
+</html>

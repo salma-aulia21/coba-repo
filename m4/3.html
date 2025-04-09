@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <title>Minggu 4 - Nomor 3</title>
+    <script>
+        function cekUmur() {
+            let nama = document.querySelector("#nama").value;
+            let umur = parseInt(document.querySelector("#umur").value);
+            let hasil = document.querySelector("#hasil");
+
+            // Cek apakah nama kosong
+            if (nama.trim() === "") {
+                alert("Isikan nama!!");
+                return;
+            }
+
+            // Cek kategori umur
+            if (umur >= 1 && umur <= 5) {
+                hasil.textContent = "Anda masih bayi";
+            } else if (umur >= 6 && umur <= 15) {
+                hasil.textContent = "Anda masih anak-anak";
+            } else if (umur >= 16 && umur <= 30) {
+                hasil.textContent = "Anda masih remaja";
+            } else if (umur >= 31 && umur <= 60) {
+                hasil.textContent = "Anda sudah dewasa";
+            } else if (umur > 60) {
+                hasil.textContent = "Anda sudah dewasa";
+            } else {
+                hasil.textContent = "Anda Game Over";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Cek Kategori Usia</h2>
+    <label>Nama:</label>
+    <input type="text" id="nama"><br><br>
+    <label>Umur:</label>
+    <input type="number" id="umur"><br><br>
+    <button onclick="cekUmur()">Submit</button>
+    <p id="hasil"></p>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Gallery</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            text-align: left;
+        }
+
+        .container {
+            width: 900px;
+            margin: 20px auto;
+            border: 2px solid rgb(83, 161, 251);
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+            padding: 15px;
+        }
+
+        .header {
+            background-color: blue;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 150px;
+            background-color: rgb(225, 225, 225);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            padding: 5px;
+            font-size: 18px;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: black;
+            font-size: 18px;
+        }
+
+        .main-content {
+            width: 60%;
+            padding: 25px;
+        }
+
+        .image {
+            width: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .image img {
+            width: 100%;
+        }
+
+        .footer {
+            background-color: blue;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>City Gallery</h1>
+        </div>
+        <div class="content">
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#">London</a></li>
+                    <li><a href="#">Paris</a></li>
+                    <li><a href="#">Tokyo</a></li>
+                </ul>
+            </div>
+            <div class="main-content">
+                <h2>London</h2>
+                <p>London is the capital city of England. It is the most populous city in the United Kingdom, with a metropolitan area of over 13 million inhabitants.</p>
+                <p>Standing on the River Thames, London has been a major settlement for two millennia, its history going back to its founding by the Romans, who named it Londinium.</p>
+            </div>
+            <div class="image">
+                <img src="https://www.visitlondon.com/-/media/images/london/visit/where-to-stay/hotels/hilton/hilton-london-related-image-copyright-visit-london-640x360.jpg?h=360&iar=0&w=640&rev=8cd7a76a6daa41e99788b5af68ee86bd&hash=61233724E357EB73424D10362DEC1CF5" alt="London">
+            </div>
+        </div>
+        <div class="footer">
+            Copyright @ (nama anda)
+        </div>
+    </div>
+</body>
+</html>
